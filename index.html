@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SG News Portal - ताज़ा और निष्पक्ष ख़बरें</title>
+    <title>SG News Portal - ताज़ा और निष्पक्ष ख़बरें</title>
     
-    <!-- Meta SEO Tags -->
-    <meta name="description" content="देश, दुनिया, खेल, राजनीति, टेक और जॉब्स की सबसे तेज़ और सटीक खबरें।">
-    <meta property="og:title" content="SG News Portal - आज की बड़ी खबरें">
+    <!-- Meta SEO & Open Graph Tags -->
+    <meta name="description" content="देश, दुनिया, खेल, राजनीति, टेक और जॉब्स की सबसे तेज़ और सटीक खबरें।">
+    <meta property="og:title" content="SG News Portal - आज की बड़ी खबरें">
     <meta property="og:type" content="website">
     
     <!-- Tailwind CSS -->
@@ -62,7 +62,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col justify-between">
 
     <!-- Reading Progress Bar -->
     <div id="progress-bar"></div>
@@ -87,7 +87,7 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             
             <!-- Logo -->
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="filterNews('all')">
                 <span class="bg-red-600 text-white font-extrabold text-3xl px-3 py-1 rounded shadow">SG</span>
                 <div>
                     <h1 class="text-2xl font-black tracking-tight text-red-600 dark:text-red-500">SG NEWS</h1>
@@ -114,13 +114,12 @@
         <!-- MAIN NAVIGATION -->
         <nav class="bg-gray-900 text-white border-t border-red-600">
             <div class="max-w-7xl mx-auto px-4 flex items-center space-x-1 overflow-x-auto text-sm font-bold py-2">
-                <a href="#" onclick="filterNews('all')" class="px-3 py-1 bg-red-600 rounded">Home</a>
-                <a href="#trending" onclick="filterNews('all')" class="px-3 py-1 hover:bg-gray-800 rounded">🔥 Trending</a>
-                <a href="#politics" onclick="filterNews('Politics')" class="px-3 py-1 hover:bg-gray-800 rounded">🗳️ राजनीति</a>
-                <a href="#sports" onclick="filterNews('Sports News')" class="px-3 py-1 hover:bg-gray-800 rounded">🏏 खेल</a>
-                <a href="#tech" onclick="filterNews('Tech')" class="px-3 py-1 hover:bg-gray-800 rounded">📱 टेक्नोलॉजी</a>
-                <a href="#jobs" onclick="filterNews('Jobs')" class="px-3 py-1 hover:bg-gray-800 rounded">💼 नौकरी/Jobs</a>
-                <a href="#videos" class="px-3 py-1 hover:bg-gray-800 rounded">🎥 वीडियो</a>
+                <button onclick="filterNews('all')" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded transition">Home</button>
+                <button onclick="filterNews('Trending')" class="px-3 py-1 hover:bg-gray-800 rounded transition">🔥 Trending</button>
+                <button onclick="filterNews('Politics')" class="px-3 py-1 hover:bg-gray-800 rounded transition">🗳️ राजनीति</button>
+                <button onclick="filterNews('Sports')" class="px-3 py-1 hover:bg-gray-800 rounded transition">🏏 खेल</button>
+                <button onclick="filterNews('Tech')" class="px-3 py-1 hover:bg-gray-800 rounded transition">📱 टेक्नोलॉजी</button>
+                <button onclick="filterNews('Jobs')" class="px-3 py-1 hover:bg-gray-800 rounded transition">💼 नौकरी/Jobs</button>
             </div>
         </nav>
 
@@ -128,7 +127,7 @@
         <div class="bg-red-600 text-white flex items-center px-4 py-1.5 text-xs font-bold">
             <span class="bg-black text-red-500 uppercase px-2 py-0.5 rounded mr-3 shrink-0 animate-pulse">BREAKING</span>
             <div class="overflow-hidden w-full">
-                <div class="ticker-move">
+                <div class="ticker-move" id="ticker-text">
                     🔥 SG NEWS: देश-विदेश और खेल जगत की हर ब्रेकिंग अपडेट यहाँ पब्लिश होती है...
                 </div>
             </div>
@@ -136,81 +135,27 @@
     </header>
 
     <!-- 3. MAIN CONTENT CONTAINER -->
-    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
         
         <!-- LEFT 8 COLUMNS: MAIN NEWS & CATEGORIES -->
         <div class="lg:col-span-8 space-y-10">
 
-            <!-- HERO BREAKING NEWS (Full Width Card) -->
+            <!-- HERO BREAKING NEWS -->
             <section id="hero-section">
-                <div class="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
-                    <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-3 py-1 rounded shadow uppercase z-10 animate-bounce">
-                        🔴 LIVE BREAKING
-                    </span>
-                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200" alt="Breaking News" class="w-full h-80 md:h-96 object-cover">
-                    <div class="p-6">
-                        <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                            <span>📅 आज</span>
-                            <span>⏱️ 3 मिनट पठन</span>
-                            <span>👁️ 1.2k Views</span>
-                        </div>
-                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white leading-snug hover:text-red-600 transition">
-                            मुख्य ब्रेकिंग न्यूज़: देश और विदेश के बड़े फैसलों का विश्लेषण यहाँ पढ़ें
-                        </h2>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mt-3 line-clamp-2">
-                            ताज़ा ख़बरों के इस विशेष बुलेटिन में जानिए सरकार के नए दिशानिर्देशों और नीतिगत बदलावों से आम जनता पर क्या प्रभाव पड़ेगा...
-                        </p>
-                    </div>
+                <div id="hero-container" class="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
+                    <!-- Dynamic Hero Card inserted via JS -->
                 </div>
             </section>
 
-            <!-- LATEST NEWS GRID (AUTO-UPDATED BY PYTHON BOT) -->
+            <!-- LATEST NEWS GRID -->
             <section id="latest-news">
-                <h3 class="text-xl font-extrabold mb-4 border-l-4 border-red-600 pl-3 flex justify-between items-center">
-                    <span>📰 ताज़ा ख़बरें (Latest News)</span>
+                <h3 class="text-xl font-extrabold mb-4 border-l-4 border-red-600 pl-3 flex justify-between items-center" id="section-title">
+                    <span>📰 ताज़ा ख़बरें (Latest News)</span>
                 </h3>
 
                 <!-- News Grid Target -->
                 <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- RECENT_NEWS_START -->
-                    <!-- Python Bot Auto-Inserts Here -->
-                    <!-- RECENT_NEWS_END -->
-                </div>
-            </section>
-
-            <!-- POLITICS SECTION -->
-            <section id="politics" class="pt-4">
-                <h3 class="text-xl font-extrabold mb-4 border-l-4 border-blue-600 pl-3 text-blue-600">
-                    🗳️ राजनीति (Politics)
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- POLITICS_START -->
-                    <!-- Python Bot Auto-Inserts Here -->
-                    <!-- POLITICS_END -->
-                </div>
-            </section>
-
-            <!-- SPORTS SECTION -->
-            <section id="sports" class="pt-4">
-                <h3 class="text-xl font-extrabold mb-4 border-l-4 border-green-600 pl-3 text-green-600">
-                    🏏 खेल जगत (Sports)
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- SPORTS_START -->
-                    <!-- Python Bot Auto-Inserts Here -->
-                    <!-- SPORTS_END -->
-                </div>
-            </section>
-
-            <!-- JOBS SECTION -->
-            <section id="jobs" class="pt-4">
-                <h3 class="text-xl font-extrabold mb-4 border-l-4 border-amber-600 pl-3 text-amber-600">
-                    💼 नौकरी एवं रोजगार (Jobs)
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- JOBS_START -->
-                    <!-- Python Bot Auto-Inserts Here -->
-                    <!-- JOBS_END -->
+                    <!-- Dynamic News Cards inserted via JS -->
                 </div>
             </section>
 
@@ -225,10 +170,8 @@
                     <h3 class="text-lg font-extrabold mb-4 border-b pb-2 border-red-600 flex items-center gap-2">
                         🔥 Trending Updates
                     </h3>
-                    <div class="space-y-4">
-                        <!-- TRENDING_START -->
-                        <!-- Python Bot Auto-Inserts Here -->
-                        <!-- TRENDING_END -->
+                    <div class="space-y-4" id="trending-container">
+                        <!-- Dynamic Trending Links inserted via JS -->
                     </div>
                 </div>
 
@@ -239,10 +182,12 @@
 
                 <!-- NEWSLETTER SUBSCRIPTION -->
                 <div class="bg-gradient-to-r from-red-600 to-red-800 text-white p-6 rounded-xl shadow">
-                    <h4 class="font-extrabold text-lg mb-2">📬 ताज़ा अपडेट्स सीधे ईमेल पर!</h4>
+                    <h4 class="font-extrabold text-lg mb-2">📬 ताज़ा अपडेट्स सीधे ईमेल पर!</h4>
                     <p class="text-xs mb-4 opacity-90">रोजाना सुबह की बड़ी खबरें अपने इनबॉक्स में प्राप्त करें।</p>
-                    <input type="email" placeholder="आपका ईमेल यहाँ डालें..." class="w-full text-sm px-3 py-2 rounded text-gray-900 mb-2 focus:outline-none">
-                    <button class="w-full bg-black hover:bg-gray-900 font-bold py-2 rounded text-sm transition">सब्सक्राइब करें</button>
+                    <form onsubmit="handleSubscribe(event)">
+                        <input type="email" required placeholder="आपका ईमेल यहाँ डालें..." class="w-full text-sm px-3 py-2 rounded text-gray-900 mb-2 focus:outline-none">
+                        <button type="submit" class="w-full bg-black hover:bg-gray-900 font-bold py-2 rounded text-sm transition">सब्सक्राइब करें</button>
+                    </form>
                 </div>
 
             </div>
@@ -260,10 +205,10 @@
             <div>
                 <h5 class="text-white font-bold mb-3">क्विक लिंक्स</h5>
                 <ul class="space-y-2 text-xs">
-                    <li><a href="#" class="hover:text-white">मुख्य पृष्ठ (Home)</a></li>
-                    <li><a href="#politics" class="hover:text-white">राजनीति</a></li>
-                    <li><a href="#sports" class="hover:text-white">खेल समाचार</a></li>
-                    <li><a href="#jobs" class="hover:text-white">जॉब अलर्ट्स</a></li>
+                    <li><button onclick="filterNews('all')" class="hover:text-white">मुख्य पृष्ठ (Home)</button></li>
+                    <li><button onclick="filterNews('Politics')" class="hover:text-white">राजनीति</button></li>
+                    <li><button onclick="filterNews('Sports')" class="hover:text-white">खेल समाचार</button></li>
+                    <li><button onclick="filterNews('Jobs')" class="hover:text-white">जॉब अलर्ट्स</button></li>
                 </ul>
             </div>
             <div>
@@ -292,14 +237,175 @@
         ⬆
     </button>
 
-    <!-- JAVASCRIPT FEATURES -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Current Date Generator
-        document.getElementById('current-date').innerText = new Date().toLocaleDateString('hi-IN', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        // Sample News Database (आपके Python Bot द्वारा जनरेट की गई news.json फाइल को फेच किया जा सकता है)
+        let articles = [
+            {
+                id: 1,
+                title: "सरकार का बड़ा फैसला: नई टेक नीतियों से युवाओं के लिए रोजगार के नए अवसर",
+                category: "Tech",
+                summary: "आईटी सेक्टर और आर्टिफिशियल इंटेलिजेंस में बड़े बदलावों के साथ नए दिशा-निर्देश लागू किए गए हैं...",
+                image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
+                date: "आज",
+                readTime: "3 मिनट",
+                views: "1.5k",
+                isHero: true,
+                isTrending: true
+            },
+            {
+                id: 2,
+                title: "संसद में बजट सत्र का दूसरा दिन: विपक्ष का जोरदार हंगामा",
+                category: "Politics",
+                summary: "विभिन्न मुद्दों पर चर्चा को लेकर संसद के दोनों सदनों में तीखी बहस देखने को मिली...",
+                image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800",
+                date: "1 घंटा पहले",
+                readTime: "2 मिनट",
+                views: "890",
+                isHero: false,
+                isTrending: true
+            },
+            {
+                id: 3,
+                title: "भारत बनाम ऑस्ट्रेलिया: टी-20 सीरीज का फाइनल मुकाबला आज",
+                category: "Sports",
+                summary: "दोनों टीमें शाम 7 बजे आमने-सामने होंगी। प्लेइंग इलेवन में बदलाव संभव...",
+                image: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800",
+                date: "2 घंटे पहले",
+                readTime: "4 मिनट",
+                views: "2.3k",
+                isHero: false,
+                isTrending: true
+            },
+            {
+                id: 4,
+                title: "रेलवे भर्ती 2026: तकनीशियन और नॉन-टेक्निकल पदों पर बंपर वैकेंसी",
+                category: "Jobs",
+                summary: "भारतीय रेलवे ने हजारों पदों पर सीधी भर्ती का नोटिफिकेशन जारी किया है...",
+                image: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800",
+                date: "3 घंटे पहले",
+                readTime: "3 मिनट",
+                views: "3.1k",
+                isHero: false,
+                isTrending: false
+            }
+        ];
+
+        // 1. Initial Load
+        document.addEventListener("DOMContentLoaded", () => {
+            renderHero();
+            renderNews(articles);
+            renderTrending();
+            setupDate();
         });
 
-        // Reading Progress Bar & Scroll To Top
+        function setupDate() {
+            document.getElementById('current-date').innerText = "📅 " + new Date().toLocaleDateString('hi-IN', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+
+        // 2. Render Hero Article
+        function renderHero() {
+            const hero = articles.find(a => a.isHero) || articles[0];
+            const heroContainer = document.getElementById('hero-container');
+            heroContainer.innerHTML = `
+                <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-3 py-1 rounded shadow uppercase z-10 animate-bounce">
+                    🔴 LIVE BREAKING
+                </span>
+                <img src="${hero.image}" alt="${hero.title}" class="w-full h-80 md:h-96 object-cover">
+                <div class="p-6">
+                    <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                        <span>📅 ${hero.date}</span>
+                        <span>⏱️ ${hero.readTime} पठन</span>
+                        <span>👁️ ${hero.views} Views</span>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white leading-snug hover:text-red-600 transition cursor-pointer">
+                        ${hero.title}
+                    </h2>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mt-3 line-clamp-2">
+                        ${hero.summary}
+                    </p>
+                    <div class="mt-4 flex items-center gap-3">
+                        <button onclick="shareArticle('${hero.title}')" class="text-xs font-bold text-red-600 dark:text-red-400 hover:underline">🔗 Share</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. Render News Cards Grid
+        function renderNews(data) {
+            const newsContainer = document.getElementById('news-container');
+            newsContainer.innerHTML = '';
+
+            if(data.length === 0) {
+                newsContainer.innerHTML = `<p class="col-span-2 text-center text-gray-500 py-8">कोई खबर नहीं मिली।</p>`;
+                return;
+            }
+
+            data.forEach(item => {
+                newsContainer.innerHTML += `
+                    <div class="news-card bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
+                        <div>
+                            <img src="${item.image}" alt="${item.title}" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-200">${item.category}</span>
+                                <h4 class="font-bold text-base mt-2 hover:text-red-600 transition cursor-pointer text-gray-900 dark:text-white line-clamp-2">${item.title}</h4>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">${item.summary}</p>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 mt-3">
+                            <span>⏱️ ${item.readTime}</span>
+                            <button onclick="shareArticle('${item.title}')" class="hover:text-red-600">🔗 शेयर</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 4. Render Trending Sidebar
+        function renderTrending() {
+            const trendingContainer = document.getElementById('trending-container');
+            const trendingList = articles.filter(a => a.isTrending);
+            
+            trendingContainer.innerHTML = '';
+            trendingList.forEach((item, index) => {
+                trendingContainer.innerHTML += `
+                    <div class="flex items-start space-x-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                        <span class="text-2xl font-black text-red-600 opacity-60">0${index + 1}</span>
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase text-gray-400">${item.category}</span>
+                            <h5 class="text-sm font-bold hover:text-red-600 cursor-pointer text-gray-800 dark:text-gray-200 line-clamp-2">${item.title}</h5>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 5. Category Filter Function
+        function filterNews(category) {
+            const titleElement = document.getElementById('section-title');
+            if (category === 'all') {
+                titleElement.innerHTML = `<span>📰 ताज़ा ख़बरें (Latest News)</span>`;
+                renderNews(articles);
+            } else {
+                titleElement.innerHTML = `<span>📂 ${category} ख़बरें</span>`;
+                const filtered = articles.filter(a => a.category.toLowerCase() === category.toLowerCase() || (category === 'Trending' && a.isTrending));
+                renderNews(filtered);
+            }
+        }
+
+        // 6. Live Search Functionality
+        function searchLiveNews() {
+            let query = document.getElementById('main-search').value.toLowerCase();
+            let filtered = articles.filter(item => 
+                item.title.toLowerCase().includes(query) || 
+                item.summary.toLowerCase().includes(query)
+            );
+            renderNews(filtered);
+        }
+
+        // 7. Reading Progress & Scroll To Top
         window.onscroll = function() {
             let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -314,7 +420,7 @@
             }
         };
 
-        // Dark Mode Logic
+        // 8. Dark Mode Toggle
         const themeToggleBtn = document.getElementById('theme-toggle');
         const darkIcon = document.getElementById('theme-toggle-dark-icon');
         const lightIcon = document.getElementById('theme-toggle-light-icon');
@@ -337,28 +443,37 @@
             }
         });
 
-        // Live Search Logic
-        function searchLiveNews() {
-            let query = document.getElementById('main-search').value.toLowerCase();
-            let cards = document.querySelectorAll('.news-card');
-            cards.forEach(card => {
-                let text = card.innerText.toLowerCase();
-                card.style.display = text.includes(query) ? "block" : "none";
-            });
-        }
-
-        // Voice Reader (Text to Speech)
+        // 9. Voice Assist
         function toggleSpeech() {
             if ('speechSynthesis' in window) {
-                let text = document.querySelector('h2').innerText;
-                let msg = new SpeechSynthesisUtterance(text);
+                let heroTitle = articles[0].title;
+                let msg = new SpeechSynthesisUtterance(heroTitle);
                 msg.lang = 'hi-IN';
                 window.speechSynthesis.speak(msg);
             } else {
-                alert("आपका ब्राउज़र स्पीच सपोर्ट नहीं करता।");
+                alert("आपका ब्राउज़र स्पीच सपोर्ट नहीं करता।");
             }
         }
-    </script>
 
+        // 10. Social Share Utility
+        function shareArticle(title) {
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    url: window.location.href
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert("लिंक कॉपी हो गया है!");
+            }
+        }
+
+        // 11. Newsletter Mock Handling
+        function handleSubscribe(e) {
+            e.preventDefault();
+            alert("धन्यवाद! आपका ईमेल सब्सक्राइब हो गया है।");
+            e.target.reset();
+        }
+    </script>
 </body>
 </html>
