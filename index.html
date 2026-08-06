@@ -2,6 +2,7 @@
 <script>
     // 1. Global Array Declaration
     let articles = [];
+    const DEFAULT_FALLBACK_IMG = "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800";
 
     // 2. Initial Load Event
     document.addEventListener("DOMContentLoaded", () => {
@@ -18,12 +19,10 @@
         }
     }
 
-    // 3. Robust Async Fetch with Cache-Busting & Validation
+    // 3. Robust Async Fetch with Cache-Busting & Fallback Handling
     async function initNewsApp() {
         const newsContainer = document.getElementById('news-container');
-        const heroContainer = document.getElementById('hero-container');
 
-        // Show UI Loading States
         if (newsContainer) {
             newsContainer.innerHTML = `
                 <div class="col-span-2 text-center py-12">
@@ -33,56 +32,50 @@
             `;
         }
 
-        // Cache busting URL (GitHub Pages Cache Bypass)
-        const jsonUrl = `./data/news.json?v=${Date.now()}`;
+        const jsonPaths = [
+            `./data/news.json?v=${Date.now()}`,
+            `./news.json?v=${Date.now()}`
+        ];
 
-        try {
-            const response = await fetch(jsonUrl, { cache: "no-store" });
-            
-            if (!response.ok) {
-                // Fallback to root directory if data/ folder path fails
-                const fallbackResponse = await fetch(`./news.json?v=${Date.now()}`, { cache: "no-store" });
-                if (!fallbackResponse.ok) throw new Error("news.json फ़ाइल नहीं मिली।");
-                articles = await fallbackResponse.json();
-            } else {
-                articles = await response.json();
-            }
+        let loadedSuccessfully = false;
 
-            // 4. JSON Validation Check
-            if (!Array.isArray(articles)) {
-                throw new Error("Invalid JSON Format: डेटा सही फॉर्मेट (Array) में नहीं है।");
-            }
-
-            if (articles.length === 0) {
-                if (newsContainer) {
-                    newsContainer.innerHTML = `<p class="col-span-2 text-center text-gray-500 py-8">अभी कोई खबर उपलब्ध नहीं है।</p>`;
+        for (const path of jsonPaths) {
+            try {
+                const response = await fetch(path, { cache: "no-store" });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        articles = data;
+                        loadedSuccessfully = true;
+                        break;
+                    }
                 }
-                return;
-            }
-
-            // Optional: ID के हिसाब से खबरों को सॉर्ट करें (ताकि नवीनतम खबर सबसे ऊपर आए)
-            articles.sort((a, b) => (b.id || 0) - (a.id || 0));
-
-            // Render all UI components with explicit data passing
-            renderHero(articles);
-            renderNews(articles);
-            renderTrending(articles);
-
-        } catch (error) {
-            console.error("News Loading Error:", error);
-            if (newsContainer) {
-                newsContainer.innerHTML = `
-                    <div class="col-span-2 text-center py-10 bg-red-50 dark:bg-red-950 rounded-xl border border-red-200 dark:border-red-900 p-4">
-                        <h3 class="text-lg font-bold text-red-600 dark:text-red-400">⚠️ खबरें लोड करने में विफल</h3>
-                        <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">कृपया अपना इंटरनेट कनेक्शन जांचें या थोड़ी देर बाद प्रयास करें।</p>
-                        <button onclick="initNewsApp()" class="mt-4 px-4 py-1.5 bg-red-600 text-white text-xs font-bold rounded hover:bg-red-700 transition">पुनः प्रयास करें 🔄</button>
-                    </div>
-                `;
+            } catch (err) {
+                console.warn(`Failed loading from ${path}:`, err);
             }
         }
+
+        if (!loadedSuccessfully || articles.length === 0) {
+            if (newsContainer) {
+                newsContainer.innerHTML = `
+                    <div class="col-span-2 text-center py-10 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow">
+                        <p class="text-gray-700 dark:text-gray-300 font-bold text-base mb-1">📰 अभी कोई खबर पब्लिश नहीं हुई है</p>
+                        <p class="text-xs text-gray-500">Python Bot चलाकर नई खबरें पोस्ट करें।</p>
+                    </div>`;
+            }
+            return;
+        }
+
+        // Sort by ID descending (Latest first)
+        articles.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+        // Render UI with Safety
+        renderHero(articles);
+        renderNews(articles);
+        renderTrending(articles);
     }
 
-    // 5. Render Hero Article
+    // 4. Safe Render Hero Article
     function renderHero(dataList) {
         if (!dataList || dataList.length === 0) return;
 
@@ -90,14 +83,17 @@
         if (!heroContainer) return;
 
         const hero = dataList.find(a => a.isHero) || dataList[0];
-        const heroLink = `article.html?id=${hero.id}`;
+        if (!hero) return;
+
+        const heroLink = `./article.html?id=${hero.id}`;
+        const heroImg = hero.image && hero.image.startsWith('http') ? hero.image : DEFAULT_FALLBACK_IMG;
 
         heroContainer.innerHTML = `
-            <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-3 py-1 rounded shadow uppercase z-10 animate-bounce">
+            <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-3 py-1 rounded shadow uppercase z-10">
                 🔴 LIVE BREAKING
             </span>
             <a href="${heroLink}">
-                <img src="${hero.image}" alt="${hero.title}" loading="lazy" class="w-full h-80 md:h-96 object-cover hover:opacity-95 transition">
+                <img src="${heroImg}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" alt="${hero.title || 'News'}" loading="lazy" class="w-full h-80 md:h-96 object-cover hover:opacity-95 transition">
             </a>
             <div class="p-6">
                 <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mb-2">
@@ -107,21 +103,21 @@
                 </div>
                 <a href="${heroLink}">
                     <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white leading-snug hover:text-red-600 transition">
-                        ${hero.title}
+                        ${hero.title || 'शीर्षक उपलब्ध नहीं है'}
                     </h2>
                 </a>
                 <p class="text-gray-600 dark:text-gray-300 text-sm mt-3 line-clamp-2">
-                    ${hero.summary}
+                    ${hero.summary || ''}
                 </p>
                 <div class="mt-4 flex items-center justify-between">
                     <a href="${heroLink}" class="text-sm font-bold text-red-600 dark:text-red-400 hover:underline">पूरा पढ़ें →</a>
-                    <button onclick="shareArticle('${hero.title}')" class="text-xs font-bold text-gray-500 hover:text-red-600">🔗 Share</button>
+                    <button onclick="shareArticle('${hero.title || 'SG News'}')" class="text-xs font-bold text-gray-500 hover:text-red-600">🔗 Share</button>
                 </div>
             </div>
         `;
     }
 
-    // 6. Render News Cards Grid
+    // 5. Safe Render News Cards Grid
     function renderNews(dataList) {
         const newsContainer = document.getElementById('news-container');
         if (!newsContainer) return;
@@ -134,19 +130,21 @@
         }
 
         dataList.forEach(item => {
-            const articleLink = `article.html?id=${item.id}`;
+            const articleLink = `./article.html?id=${item.id}`;
+            const itemImg = item.image && item.image.startsWith('http') ? item.image : DEFAULT_FALLBACK_IMG;
+
             newsContainer.innerHTML += `
                 <div class="news-card bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:shadow-lg transition">
                     <div>
                         <a href="${articleLink}">
-                            <img src="${item.image}" alt="${item.title}" loading="lazy" class="w-full h-48 object-cover hover:opacity-90 transition">
+                            <img src="${itemImg}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" alt="${item.title || 'News'}" loading="lazy" class="w-full h-48 object-cover hover:opacity-90 transition">
                         </a>
                         <div class="p-4">
                             <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-200">${item.category || 'News'}</span>
                             <a href="${articleLink}">
-                                <h4 class="font-bold text-base mt-2 hover:text-red-600 transition text-gray-900 dark:text-white line-clamp-2">${item.title}</h4>
+                                <h4 class="font-bold text-base mt-2 hover:text-red-600 transition text-gray-900 dark:text-white line-clamp-2">${item.title || ''}</h4>
                             </a>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">${item.summary}</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">${item.summary || ''}</p>
                         </div>
                     </div>
                     <div class="p-4 pt-0 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 mt-3">
@@ -158,7 +156,7 @@
         });
     }
 
-    // 7. Render Trending Sidebar
+    // 6. Safe Render Trending Sidebar
     function renderTrending(dataList) {
         const trendingContainer = document.getElementById('trending-container');
         if (!trendingContainer) return;
@@ -172,14 +170,14 @@
         }
 
         trendingList.forEach((item, index) => {
-            const articleLink = `article.html?id=${item.id}`;
+            const articleLink = `./article.html?id=${item.id}`;
             trendingContainer.innerHTML += `
                 <div class="flex items-start space-x-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
                     <span class="text-2xl font-black text-red-600 opacity-60">0${index + 1}</span>
                     <div>
                         <span class="text-[10px] font-extrabold uppercase text-gray-400">${item.category || 'News'}</span>
                         <a href="${articleLink}">
-                            <h5 class="text-sm font-bold hover:text-red-600 cursor-pointer text-gray-800 dark:text-gray-200 line-clamp-2">${item.title}</h5>
+                            <h5 class="text-sm font-bold hover:text-red-600 cursor-pointer text-gray-800 dark:text-gray-200 line-clamp-2">${item.title || ''}</h5>
                         </a>
                     </div>
                 </div>
@@ -187,7 +185,7 @@
         });
     }
 
-    // 8. Category Filter Function
+    // 7. Category Filter Function
     function filterNews(category) {
         const titleElement = document.getElementById('section-title');
         if (category === 'all') {
@@ -203,7 +201,7 @@
         }
     }
 
-    // 9. Live Search Functionality
+    // 8. Live Search Functionality
     function searchLiveNews() {
         const queryInput = document.getElementById('main-search');
         if (!queryInput) return;
@@ -221,7 +219,7 @@
         renderNews(filtered);
     }
 
-    // 10. Reading Progress & Scroll To Top
+    // 9. Scroll to Top & Reading Progress Bar
     window.onscroll = function() {
         let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -240,7 +238,7 @@
         }
     };
 
-    // 11. Dark Mode Toggle
+    // 10. Dark Mode Toggle
     const themeToggleBtn = document.getElementById('theme-toggle');
     const darkIcon = document.getElementById('theme-toggle-dark-icon');
     const lightIcon = document.getElementById('theme-toggle-light-icon');
@@ -265,7 +263,7 @@
         });
     }
 
-    // 12. Voice Assist
+    // 11. Voice Assist
     function toggleSpeech() {
         if ('speechSynthesis' in window && articles.length > 0) {
             let heroTitle = articles[0].title;
@@ -277,7 +275,7 @@
         }
     }
 
-    // 13. Social Share Utility
+    // 12. Social Share Utility
     function shareArticle(title) {
         if (navigator.share) {
             navigator.share({
@@ -290,7 +288,7 @@
         }
     }
 
-    // 14. Newsletter Handling
+    // 13. Newsletter Handling
     function handleSubscribe(e) {
         e.preventDefault();
         alert("धन्यवाद! आपका ईमेल सब्सक्राइब हो गया है।");
