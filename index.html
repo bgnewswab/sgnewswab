@@ -1,428 +1,260 @@
-<!DOCTYPE html>
-<html lang="hi" class="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SG News Portal - ताज़ा और निष्पक्ष ख़बरें</title>
-    
-    <!-- Meta SEO & Open Graph Tags -->
-    <meta name="description" content="देश, दुनिया, खेल, राजनीति, टेक और जॉब्स की सबसे तेज़ और सटीक खबरें।">
-    <meta property="og:title" content="SG News Portal - आज की बड़ी खबरें">
-    <meta property="og:type" content="website">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: '#DC2626', // Red
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <style>
-        /* Ticker Animation */
-        @keyframes ticker {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-100%, 0, 0); }
-        }
-        .ticker-move {
-            display: inline-block;
-            white-space: nowrap;
-            animation: ticker 30s linear infinite;
-        }
-        .ticker-move:hover { animation-play-state: paused; }
-        
-        /* Reading Progress Bar */
-        #progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 4px;
-            background-color: #DC2626;
-            width: 0%;
-            z-index: 100;
-            transition: width 0.1s ease;
-        }
+<!-- JAVASCRIPT LOGIC -->
+<script>
+    // 1. Global Array Declaration
+    let articles = [];
 
-        /* Skeleton Loading pulse */
-        .skeleton {
-            background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-        }
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-    </style>
-</head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col justify-between">
+    // 2. Initial Load Event
+    document.addEventListener("DOMContentLoaded", () => {
+        setupDate();
+        initNewsApp();
+    });
 
-    <!-- Reading Progress Bar -->
-    <div id="progress-bar"></div>
-
-    <!-- 1. TOP UTILITY BAR -->
-    <div class="bg-gray-900 text-gray-300 text-xs py-1.5 px-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <span id="current-date">📅 लोड हो रहा है...</span>
-                <span>☀️ 31°C नई दिल्ली</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <a href="#live-tv" class="text-red-500 font-bold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-600 animate-ping"></span> LIVE TV</a>
-                <button onclick="toggleSpeech()" class="hover:text-white">🔊 Voice Assist</button>
-                <a href="#contact" class="hover:text-white">Contact Us</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. MAIN HEADER & LOGO -->
-    <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            
-            <!-- Logo -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="filterNews('all')">
-                <span class="bg-red-600 text-white font-extrabold text-3xl px-3 py-1 rounded shadow">SG</span>
-                <div>
-                    <h1 class="text-2xl font-black tracking-tight text-red-600 dark:text-red-500">SG NEWS</h1>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold tracking-widest uppercase">सत्य और सटीकता सबसे पहले</p>
-                </div>
-            </div>
-
-            <!-- Search Bar & Controls -->
-            <div class="flex items-center space-x-3">
-                <div class="relative hidden md:block">
-                    <input type="text" id="main-search" onkeyup="searchLiveNews()" placeholder="खबरें खोजें (Search)..." 
-                        class="bg-gray-100 dark:bg-gray-700 text-sm rounded-full pl-9 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-red-600 border dark:border-gray-600">
-                    <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
-                </div>
-
-                <!-- Dark Mode Toggle -->
-                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300">
-                    <span id="theme-toggle-dark-icon" class="hidden">🌙</span>
-                    <span id="theme-toggle-light-icon">☀️</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- MAIN NAVIGATION -->
-        <nav class="bg-gray-900 text-white border-t border-red-600">
-            <div class="max-w-7xl mx-auto px-4 flex items-center space-x-1 overflow-x-auto text-sm font-bold py-2">
-                <button onclick="filterNews('all')" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded transition">Home</button>
-                <button onclick="filterNews('Trending')" class="px-3 py-1 hover:bg-gray-800 rounded transition">🔥 Trending</button>
-                <button onclick="filterNews('Politics')" class="px-3 py-1 hover:bg-gray-800 rounded transition">🗳️ राजनीति</button>
-                <button onclick="filterNews('Sports')" class="px-3 py-1 hover:bg-gray-800 rounded transition">🏏 खेल</button>
-                <button onclick="filterNews('Tech')" class="px-3 py-1 hover:bg-gray-800 rounded transition">📱 टेक्नोलॉजी</button>
-                <button onclick="filterNews('Jobs')" class="px-3 py-1 hover:bg-gray-800 rounded transition">💼 नौकरी/Jobs</button>
-            </div>
-        </nav>
-
-        <!-- BREAKING NEWS TICKER -->
-        <div class="bg-red-600 text-white flex items-center px-4 py-1.5 text-xs font-bold">
-            <span class="bg-black text-red-500 uppercase px-2 py-0.5 rounded mr-3 shrink-0 animate-pulse">BREAKING</span>
-            <div class="overflow-hidden w-full">
-                <div class="ticker-move" id="ticker-text">
-                    🔥 SG NEWS: देश-विदेश और खेल जगत की हर ब्रेकिंग अपडेट यहाँ पब्लिश होती है...
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- 3. MAIN CONTENT CONTAINER -->
-    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
-        
-        <!-- LEFT 8 COLUMNS: MAIN NEWS & CATEGORIES -->
-        <div class="lg:col-span-8 space-y-10">
-
-            <!-- HERO BREAKING NEWS -->
-            <section id="hero-section">
-                <div id="hero-container" class="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
-                    <!-- Dynamic Hero Card inserted via JS -->
-                </div>
-            </section>
-
-            <!-- LATEST NEWS GRID -->
-            <section id="latest-news">
-                <h3 class="text-xl font-extrabold mb-4 border-l-4 border-red-600 pl-3 flex justify-between items-center" id="section-title">
-                    <span>📰 ताज़ा ख़बरें (Latest News)</span>
-                </h3>
-
-                <!-- News Grid Target -->
-                <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Dynamic News Cards inserted via JS -->
-                </div>
-            </section>
-
-        </div>
-
-        <!-- RIGHT 4 COLUMNS: STICKY SIDEBAR -->
-        <aside class="lg:col-span-4 space-y-8">
-            <div class="sticky top-24 space-y-6">
-
-                <!-- TRENDING NEWS SIDEBAR -->
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow border border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-extrabold mb-4 border-b pb-2 border-red-600 flex items-center gap-2">
-                        🔥 Trending Updates
-                    </h3>
-                    <div class="space-y-4" id="trending-container">
-                        <!-- Dynamic Trending Links inserted via JS -->
-                    </div>
-                </div>
-
-                <!-- ADVERTISEMENT BOX -->
-                <div class="bg-gray-200 dark:bg-gray-700 h-60 rounded-xl flex items-center justify-center text-xs text-gray-500 font-bold border border-dashed border-gray-400">
-                    📢 ADVERTISEMENT SPACE
-                </div>
-
-                <!-- NEWSLETTER SUBSCRIPTION -->
-                <div class="bg-gradient-to-r from-red-600 to-red-800 text-white p-6 rounded-xl shadow">
-                    <h4 class="font-extrabold text-lg mb-2">📬 ताज़ा अपडेट्स सीधे ईमेल पर!</h4>
-                    <p class="text-xs mb-4 opacity-90">रोजाना सुबह की बड़ी खबरें अपने इनबॉक्स में प्राप्त करें।</p>
-                    <form onsubmit="handleSubscribe(event)">
-                        <input type="email" required placeholder="आपका ईमेल यहाँ डालें..." class="w-full text-sm px-3 py-2 rounded text-gray-900 mb-2 focus:outline-none">
-                        <button type="submit" class="w-full bg-black hover:bg-gray-900 font-bold py-2 rounded text-sm transition">सब्सक्राइब करें</button>
-                    </form>
-                </div>
-
-            </div>
-        </aside>
-
-    </main>
-
-    <!-- 4. FOOTER -->
-    <footer class="bg-gray-900 text-gray-400 text-sm mt-16 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-                <span class="bg-red-600 text-white font-black text-2xl px-3 py-1 rounded">SG</span>
-                <p class="mt-3 text-xs leading-relaxed">SG News Portal पर आपको मिलती हैं देश, राजनीति, खेल और तकनीकी दुनिया की सबसे तेज और प्रामाणिक खबरें।</p>
-            </div>
-            <div>
-                <h5 class="text-white font-bold mb-3">क्विक लिंक्स</h5>
-                <ul class="space-y-2 text-xs">
-                    <li><button onclick="filterNews('all')" class="hover:text-white">मुख्य पृष्ठ (Home)</button></li>
-                    <li><button onclick="filterNews('Politics')" class="hover:text-white">राजनीति</button></li>
-                    <li><button onclick="filterNews('Sports')" class="hover:text-white">खेल समाचार</button></li>
-                    <li><button onclick="filterNews('Jobs')" class="hover:text-white">जॉब अलर्ट्स</button></li>
-                </ul>
-            </div>
-            <div>
-                <h5 class="text-white font-bold mb-3">कानूनी & नीति</h5>
-                <ul class="space-y-2 text-xs">
-                    <li><a href="#" class="hover:text-white">Privacy Policy</a></li>
-                    <li><a href="#" class="hover:text-white">Terms of Service</a></li>
-                    <li><a href="#" class="hover:text-white">Disclaimer</a></li>
-                </ul>
-            </div>
-            <div>
-                <h5 class="text-white font-bold mb-3">फॉलो करें</h5>
-                <div class="flex space-x-3 text-lg">
-                    <a href="#" class="hover:text-white">📱 Telegram</a>
-                    <a href="#" class="hover:text-white">💬 WhatsApp</a>
-                </div>
-            </div>
-        </div>
-        <div class="bg-black py-4 text-center text-xs opacity-70">
-            © 2026 SG News Portal. All Rights Reserved.
-        </div>
-    </footer>
-
-    <!-- SCROLL TO TOP BUTTON -->
-    <button id="scrollToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="hidden fixed bottom-6 right-6 bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition z-50">
-        ⬆
-    </button>
-
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        let articles = [];
-
-        // 1. Initial Load
-        document.addEventListener("DOMContentLoaded", () => {
-            setupDate();
-            loadNewsFromJSON();
-        });
-
-        function setupDate() {
-            document.getElementById('current-date').innerText = "📅 " + new Date().toLocaleDateString('hi-IN', {
+    function setupDate() {
+        const dateElement = document.getElementById('current-date');
+        if (dateElement) {
+            dateElement.innerText = "📅 " + new Date().toLocaleDateString('hi-IN', {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             });
         }
+    }
 
-        // Fetch news directly from data/news.json or news.json
-        function loadNewsFromJSON() {
-            fetch('./data/news.json')
-                .then(res => {
-                    if (!res.ok) return fetch('./news.json');
-                    return res;
-                })
-                .then(res => res.json())
-                .then(data => {
-                    articles = data;
-                    if (articles && articles.length > 0) {
-                        renderHero();
-                        renderNews(articles);
-                        renderTrending();
-                    } else {
-                        document.getElementById('news-container').innerHTML = `<p class="col-span-2 text-center text-gray-500 py-8">अभी कोई खबर उपलब्ध नहीं है।</p>`;
-                    }
-                })
-                .catch(err => {
-                    console.error("JSON Error:", err);
-                    document.getElementById('news-container').innerHTML = `<p class="col-span-2 text-center text-red-500 py-8">खबरें लोड करने में समस्या हुई।</p>`;
-                });
-        }
+    // 3. Robust Async Fetch with Cache-Busting & Validation
+    async function initNewsApp() {
+        const newsContainer = document.getElementById('news-container');
+        const heroContainer = document.getElementById('hero-container');
 
-        // 2. Render Hero Article
-        function renderHero() {
-            const hero = articles.find(a => a.isHero) || articles[0];
-            if (!hero) return;
-
-            const heroContainer = document.getElementById('hero-container');
-            const heroLink = `article.html?id=${hero.id}`;
-
-            heroContainer.innerHTML = `
-                <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-3 py-1 rounded shadow uppercase z-10 animate-bounce">
-                    🔴 LIVE BREAKING
-                </span>
-                <a href="${heroLink}">
-                    <img src="${hero.image}" alt="${hero.title}" class="w-full h-80 md:h-96 object-cover hover:opacity-95 transition">
-                </a>
-                <div class="p-6">
-                    <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                        <span>📅 ${hero.date}</span>
-                        <span>⏱️ ${hero.readTime || '3 मिनट'} पठन</span>
-                        <span>👁️ ${hero.views || '1.2k'} Views</span>
-                    </div>
-                    <a href="${heroLink}">
-                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white leading-snug hover:text-red-600 transition cursor-pointer">
-                            ${hero.title}
-                        </h2>
-                    </a>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm mt-3 line-clamp-2">
-                        ${hero.summary}
-                    </p>
-                    <div class="mt-4 flex items-center justify-between">
-                        <a href="${heroLink}" class="text-sm font-bold text-red-600 dark:text-red-400 hover:underline">पूरा पढ़ें →</a>
-                        <button onclick="shareArticle('${hero.title}')" class="text-xs font-bold text-red-600 dark:text-red-400 hover:underline">🔗 Share</button>
-                    </div>
+        // Show UI Loading States
+        if (newsContainer) {
+            newsContainer.innerHTML = `
+                <div class="col-span-2 text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-red-600 border-t-transparent"></div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 font-bold">ताज़ा खबरें लोड हो रही हैं...</p>
                 </div>
             `;
         }
 
-        // 3. Render News Cards Grid
-        function renderNews(data) {
-            const newsContainer = document.getElementById('news-container');
-            newsContainer.innerHTML = '';
+        // Cache busting URL (GitHub Pages Cache Bypass)
+        const jsonUrl = `./data/news.json?v=${Date.now()}`;
 
-            if (data.length === 0) {
-                newsContainer.innerHTML = `<p class="col-span-2 text-center text-gray-500 py-8">कोई खबर नहीं मिली।</p>`;
+        try {
+            const response = await fetch(jsonUrl, { cache: "no-store" });
+            
+            if (!response.ok) {
+                // Fallback to root directory if data/ folder path fails
+                const fallbackResponse = await fetch(`./news.json?v=${Date.now()}`, { cache: "no-store" });
+                if (!fallbackResponse.ok) throw new Error("news.json फ़ाइल नहीं मिली।");
+                articles = await fallbackResponse.json();
+            } else {
+                articles = await response.json();
+            }
+
+            // 4. JSON Validation Check
+            if (!Array.isArray(articles)) {
+                throw new Error("Invalid JSON Format: डेटा सही फॉर्मेट (Array) में नहीं है।");
+            }
+
+            if (articles.length === 0) {
+                if (newsContainer) {
+                    newsContainer.innerHTML = `<p class="col-span-2 text-center text-gray-500 py-8">अभी कोई खबर उपलब्ध नहीं है।</p>`;
+                }
                 return;
             }
 
-            data.forEach(item => {
-                const articleLink = `article.html?id=${item.id}`;
-                newsContainer.innerHTML += `
-                    <div class="news-card bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
-                        <div>
-                            <a href="${articleLink}">
-                                <img src="${item.image}" alt="${item.title}" class="w-full h-48 object-cover hover:opacity-90 transition">
-                            </a>
-                            <div class="p-4">
-                                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-200">${item.category || 'News'}</span>
-                                <a href="${articleLink}">
-                                    <h4 class="font-bold text-base mt-2 hover:text-red-600 transition cursor-pointer text-gray-900 dark:text-white line-clamp-2">${item.title}</h4>
-                                </a>
-                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">${item.summary}</p>
-                            </div>
-                        </div>
-                        <div class="p-4 pt-0 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 mt-3">
-                            <span>⏱️ ${item.readTime || '3 मिनट'}</span>
-                            <a href="${articleLink}" class="hover:text-red-600 font-bold text-red-600">पूरा पढ़ें →</a>
-                        </div>
+            // Optional: ID के हिसाब से खबरों को सॉर्ट करें (ताकि नवीनतम खबर सबसे ऊपर आए)
+            articles.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+            // Render all UI components with explicit data passing
+            renderHero(articles);
+            renderNews(articles);
+            renderTrending(articles);
+
+        } catch (error) {
+            console.error("News Loading Error:", error);
+            if (newsContainer) {
+                newsContainer.innerHTML = `
+                    <div class="col-span-2 text-center py-10 bg-red-50 dark:bg-red-950 rounded-xl border border-red-200 dark:border-red-900 p-4">
+                        <h3 class="text-lg font-bold text-red-600 dark:text-red-400">⚠️ खबरें लोड करने में विफल</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">कृपया अपना इंटरनेट कनेक्शन जांचें या थोड़ी देर बाद प्रयास करें।</p>
+                        <button onclick="initNewsApp()" class="mt-4 px-4 py-1.5 bg-red-600 text-white text-xs font-bold rounded hover:bg-red-700 transition">पुनः प्रयास करें 🔄</button>
                     </div>
                 `;
-            });
-        }
-
-        // 4. Render Trending Sidebar
-        function renderTrending() {
-            const trendingContainer = document.getElementById('trending-container');
-            const trendingList = articles.filter(a => a.isTrending);
-            
-            trendingContainer.innerHTML = '';
-            trendingList.forEach((item, index) => {
-                const articleLink = `article.html?id=${item.id}`;
-                trendingContainer.innerHTML += `
-                    <div class="flex items-start space-x-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
-                        <span class="text-2xl font-black text-red-600 opacity-60">0${index + 1}</span>
-                        <div>
-                            <span class="text-[10px] font-extrabold uppercase text-gray-400">${item.category || 'News'}</span>
-                            <a href="${articleLink}">
-                                <h5 class="text-sm font-bold hover:text-red-600 cursor-pointer text-gray-800 dark:text-gray-200 line-clamp-2">${item.title}</h5>
-                            </a>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // 5. Category Filter Function
-        function filterNews(category) {
-            const titleElement = document.getElementById('section-title');
-            if (category === 'all') {
-                titleElement.innerHTML = `<span>📰 ताज़ा ख़बरें (Latest News)</span>`;
-                renderNews(articles);
-            } else {
-                titleElement.innerHTML = `<span>📂 ${category} ख़बरें</span>`;
-                const filtered = articles.filter(a => (a.category && a.category.toLowerCase() === category.toLowerCase()) || (category === 'Trending' && a.isTrending));
-                renderNews(filtered);
             }
         }
+    }
 
-        // 6. Live Search Functionality
-        function searchLiveNews() {
-            let query = document.getElementById('main-search').value.toLowerCase();
-            let filtered = articles.filter(item => 
-                item.title.toLowerCase().includes(query) || 
-                (item.summary && item.summary.toLowerCase().includes(query))
+    // 5. Render Hero Article
+    function renderHero(dataList) {
+        if (!dataList || dataList.length === 0) return;
+
+        const heroContainer = document.getElementById('hero-container');
+        if (!heroContainer) return;
+
+        const hero = dataList.find(a => a.isHero) || dataList[0];
+        const heroLink = `article.html?id=${hero.id}`;
+
+        heroContainer.innerHTML = `
+            <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-3 py-1 rounded shadow uppercase z-10 animate-bounce">
+                🔴 LIVE BREAKING
+            </span>
+            <a href="${heroLink}">
+                <img src="${hero.image}" alt="${hero.title}" loading="lazy" class="w-full h-80 md:h-96 object-cover hover:opacity-95 transition">
+            </a>
+            <div class="p-6">
+                <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    <span>📅 ${hero.date || 'आज'}</span>
+                    <span>⏱️ ${hero.readTime || '3 मिनट'}</span>
+                    <span>👁️ ${hero.views || '1.2k'} Views</span>
+                </div>
+                <a href="${heroLink}">
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white leading-snug hover:text-red-600 transition">
+                        ${hero.title}
+                    </h2>
+                </a>
+                <p class="text-gray-600 dark:text-gray-300 text-sm mt-3 line-clamp-2">
+                    ${hero.summary}
+                </p>
+                <div class="mt-4 flex items-center justify-between">
+                    <a href="${heroLink}" class="text-sm font-bold text-red-600 dark:text-red-400 hover:underline">पूरा पढ़ें →</a>
+                    <button onclick="shareArticle('${hero.title}')" class="text-xs font-bold text-gray-500 hover:text-red-600">🔗 Share</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // 6. Render News Cards Grid
+    function renderNews(dataList) {
+        const newsContainer = document.getElementById('news-container');
+        if (!newsContainer) return;
+
+        newsContainer.innerHTML = '';
+
+        if (!dataList || dataList.length === 0) {
+            newsContainer.innerHTML = `<p class="col-span-2 text-center text-gray-500 py-8">कोई खबर नहीं मिली।</p>`;
+            return;
+        }
+
+        dataList.forEach(item => {
+            const articleLink = `article.html?id=${item.id}`;
+            newsContainer.innerHTML += `
+                <div class="news-card bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:shadow-lg transition">
+                    <div>
+                        <a href="${articleLink}">
+                            <img src="${item.image}" alt="${item.title}" loading="lazy" class="w-full h-48 object-cover hover:opacity-90 transition">
+                        </a>
+                        <div class="p-4">
+                            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-200">${item.category || 'News'}</span>
+                            <a href="${articleLink}">
+                                <h4 class="font-bold text-base mt-2 hover:text-red-600 transition text-gray-900 dark:text-white line-clamp-2">${item.title}</h4>
+                            </a>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">${item.summary}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 mt-3">
+                        <span>⏱️ ${item.readTime || '3 मिनट'}</span>
+                        <a href="${articleLink}" class="text-red-600 dark:text-red-400 font-bold hover:underline">पूरा पढ़ें →</a>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // 7. Render Trending Sidebar
+    function renderTrending(dataList) {
+        const trendingContainer = document.getElementById('trending-container');
+        if (!trendingContainer) return;
+
+        const trendingList = dataList.filter(a => a.isTrending);
+        
+        trendingContainer.innerHTML = '';
+        if (trendingList.length === 0) {
+            trendingContainer.innerHTML = `<p class="text-xs text-gray-400">कोई ट्रेंडिंग अपडेट नहीं है।</p>`;
+            return;
+        }
+
+        trendingList.forEach((item, index) => {
+            const articleLink = `article.html?id=${item.id}`;
+            trendingContainer.innerHTML += `
+                <div class="flex items-start space-x-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                    <span class="text-2xl font-black text-red-600 opacity-60">0${index + 1}</span>
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase text-gray-400">${item.category || 'News'}</span>
+                        <a href="${articleLink}">
+                            <h5 class="text-sm font-bold hover:text-red-600 cursor-pointer text-gray-800 dark:text-gray-200 line-clamp-2">${item.title}</h5>
+                        </a>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // 8. Category Filter Function
+    function filterNews(category) {
+        const titleElement = document.getElementById('section-title');
+        if (category === 'all') {
+            if (titleElement) titleElement.innerHTML = `<span>📰 ताज़ा ख़बरें (Latest News)</span>`;
+            renderNews(articles);
+        } else {
+            if (titleElement) titleElement.innerHTML = `<span>📂 ${category} ख़बरें</span>`;
+            const filtered = articles.filter(a => 
+                (a.category && a.category.toLowerCase() === category.toLowerCase()) || 
+                (category === 'Trending' && a.isTrending)
             );
             renderNews(filtered);
         }
+    }
 
-        // 7. Reading Progress & Scroll To Top
-        window.onscroll = function() {
-            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            let scrolled = (winScroll / height) * 100;
-            document.getElementById("progress-bar").style.width = scrolled + "%";
+    // 9. Live Search Functionality
+    function searchLiveNews() {
+        const queryInput = document.getElementById('main-search');
+        if (!queryInput) return;
 
-            let scrollBtn = document.getElementById("scrollToTop");
+        const query = queryInput.value.toLowerCase().trim();
+        if (query === '') {
+            renderNews(articles);
+            return;
+        }
+
+        const filtered = articles.filter(item => 
+            (item.title && item.title.toLowerCase().includes(query)) || 
+            (item.summary && item.summary.toLowerCase().includes(query))
+        );
+        renderNews(filtered);
+    }
+
+    // 10. Reading Progress & Scroll To Top
+    window.onscroll = function() {
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        let scrolled = (winScroll / height) * 100;
+
+        const progressBar = document.getElementById("progress-bar");
+        if (progressBar) progressBar.style.width = scrolled + "%";
+
+        const scrollBtn = document.getElementById("scrollToTop");
+        if (scrollBtn) {
             if (winScroll > 300) {
                 scrollBtn.classList.remove("hidden");
             } else {
                 scrollBtn.classList.add("hidden");
             }
-        };
-
-        // 8. Dark Mode Toggle
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const darkIcon = document.getElementById('theme-toggle-dark-icon');
-        const lightIcon = document.getElementById('theme-toggle-light-icon');
-
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            lightIcon.classList.add('hidden');
-            darkIcon.classList.remove('hidden');
         }
+    };
 
+    // 11. Dark Mode Toggle
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const darkIcon = document.getElementById('theme-toggle-dark-icon');
+    const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        if (lightIcon) lightIcon.classList.add('hidden');
+        if (darkIcon) darkIcon.classList.remove('hidden');
+    }
+
+    if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', function() {
-            darkIcon.classList.toggle('hidden');
-            lightIcon.classList.toggle('hidden');
+            if (darkIcon) darkIcon.classList.toggle('hidden');
+            if (lightIcon) lightIcon.classList.toggle('hidden');
             if (document.documentElement.classList.contains('dark')) {
                 document.documentElement.classList.remove('dark');
                 localStorage.setItem('color-theme', 'light');
@@ -431,38 +263,37 @@
                 localStorage.setItem('color-theme', 'dark');
             }
         });
+    }
 
-        // 9. Voice Assist
-        function toggleSpeech() {
-            if ('speechSynthesis' in window && articles.length > 0) {
-                let heroTitle = articles[0].title;
-                let msg = new SpeechSynthesisUtterance(heroTitle);
-                msg.lang = 'hi-IN';
-                window.speechSynthesis.speak(msg);
-            } else {
-                alert("आपका ब्राउज़र स्पीच सपोर्ट नहीं करता या कोई खबर उपलब्ध नहीं है।");
-            }
+    // 12. Voice Assist
+    function toggleSpeech() {
+        if ('speechSynthesis' in window && articles.length > 0) {
+            let heroTitle = articles[0].title;
+            let msg = new SpeechSynthesisUtterance(heroTitle);
+            msg.lang = 'hi-IN';
+            window.speechSynthesis.speak(msg);
+        } else {
+            alert("कोई खबर उपलब्ध नहीं है या आपका ब्राउज़र स्पीच सपोर्ट नहीं करता।");
         }
+    }
 
-        // 10. Social Share Utility
-        function shareArticle(title) {
-            if (navigator.share) {
-                navigator.share({
-                    title: title,
-                    url: window.location.href
-                }).catch(() => {});
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert("लिंक कॉपी हो गया है!");
-            }
+    // 13. Social Share Utility
+    function shareArticle(title) {
+        if (navigator.share) {
+            navigator.share({
+                title: title,
+                url: window.location.href
+            }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert("लिंक कॉपी हो गया है!");
         }
+    }
 
-        // 11. Newsletter Handling
-        function handleSubscribe(e) {
-            e.preventDefault();
-            alert("धन्यवाद! आपका ईमेल सब्सक्राइब हो गया है।");
-            e.target.reset();
-        }
-    </script>
-</body>
-</html>
+    // 14. Newsletter Handling
+    function handleSubscribe(e) {
+        e.preventDefault();
+        alert("धन्यवाद! आपका ईमेल सब्सक्राइब हो गया है।");
+        e.target.reset();
+    }
+</script>
