@@ -3,55 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SG News Portal - ताज़ा और निष्पक्ष ख़बरें</title>
+    <title>SG News - देश-दुनिया की ताज़ा और निष्पक्ष ख़बरें</title>
     
-    <!-- Meta SEO & Open Graph Tags -->
-    <meta name="description" content="देश, दुनिया, खेल, राजनीति, टेक और जॉब्स की सबसे तेज़ और सटीक खबरें।">
-    <meta property="og:title" content="SG News Portal - आज की बड़ी खबरें">
+    <!-- Dynamic & Primary Meta Tags -->
+    <meta name="description" content="SG News पर पढ़ें देश, दुनिया, खेल, राजनीति, टेक्नोलॉजी और जॉब्स की सबसे तेज़ और सटीक हिंदी खबरें।">
+    <meta name="keywords" content="SG News, Hindi News, Latest News, Breaking News Hindi, Sports News, Politics">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bgnewswab.github.io/sgnewswab/">
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    
-    <!-- Favicon 404 Prevention -->
-    <link rel="icon" href="data:,">
+    <meta property="og:url" content="https://bgnewswab.github.io/sgnewswab/">
+    <meta property="og:title" content="SG News Portal - ताज़ा ख़बरें">
+    <meta property="og:description" content="देश-दुनिया और खेल जगत की हर बड़ी अपडेट पढ़ें SG News पर।">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bgnewswab.github.io/sgnewswab/">
+    <meta property="twitter:title" content="SG News Portal">
+    <meta property="twitter:description" content="देश-दुनिया और खेल जगत की हर बड़ी अपडेट पढ़ें SG News पर।">
+
+    <!-- JSON-LD Structured Data (Organization & Website Schema) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsMediaOrganization",
+      "name": "SG News",
+      "url": "https://bgnewswab.github.io/sgnewswab/",
+      "logo": "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800",
+      "sameAs": []
+    }
+    </script>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: '#DC2626', // Red
-                    }
-                }
-            }
+            theme: { extend: { colors: { brand: '#DC2626' } } }
         }
     </script>
     
     <style>
-        /* Ticker Animation */
-        @keyframes ticker {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-100%, 0, 0); }
-        }
-        .ticker-move {
-            display: inline-block;
-            white-space: nowrap;
-            animation: ticker 30s linear infinite;
-        }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        .ticker-move { display: inline-block; white-space: nowrap; animation: ticker 35s linear infinite; }
         .ticker-move:hover { animation-play-state: paused; }
-        
-        /* Reading Progress Bar */
-        #progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 4px;
-            background-color: #DC2626;
-            width: 0%;
-            z-index: 100;
-            transition: width 0.1s ease;
-        }
+        #progress-bar { position: fixed; top: 0; left: 0; height: 4px; background-color: #DC2626; width: 0%; z-index: 100; transition: width 0.1s ease; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col justify-between">
@@ -64,11 +62,11 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-4">
                 <span id="current-date">📅 लोड हो रहा है...</span>
-                <span>☀️ 31°C नई दिल्ली</span>
+                <span id="weather-info">☀️ 30°C नई दिल्ली</span>
             </div>
             <div class="flex items-center space-x-4">
                 <a href="#live-tv" class="text-red-500 font-bold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-600 animate-ping"></span> LIVE TV</a>
-                <button onclick="toggleSpeech()" class="hover:text-white">🔊 Voice Assist</button>
+                <button onclick="toggleVoiceAssist()" aria-label="Voice Assist" class="hover:text-white">🔊 Voice Assist</button>
             </div>
         </div>
     </div>
@@ -76,26 +74,23 @@
     <!-- 2. MAIN HEADER & LOGO -->
     <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            
-            <!-- Logo -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="filterNews('all')">
+            <a href="./index.html" class="flex items-center space-x-3">
                 <span class="bg-red-600 text-white font-extrabold text-3xl px-3 py-1 rounded shadow">SG</span>
                 <div>
                     <h1 class="text-2xl font-black tracking-tight text-red-600 dark:text-red-500">SG NEWS</h1>
                     <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold tracking-widest uppercase">सत्य और सटीकता सबसे पहले</p>
                 </div>
-            </div>
+            </a>
 
-            <!-- Search Bar & Controls -->
             <div class="flex items-center space-x-3">
                 <div class="relative hidden md:block">
-                    <input type="text" id="main-search" onkeyup="searchLiveNews()" placeholder="खबरें खोजें..." 
+                    <input type="text" id="main-search" onkeyup="searchLiveNews()" placeholder="खबरें खोजें (Title, Content)..." 
                         class="bg-gray-100 dark:bg-gray-700 text-sm rounded-full pl-9 pr-4 py-2 w-64 focus:outline-none border dark:border-gray-600">
                     <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
                 </div>
 
-                <!-- Dark Mode Toggle -->
-                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                <!-- Dark Mode Toggle Button -->
+                <button id="theme-toggle" aria-label="Toggle Theme" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                     <span id="theme-toggle-dark-icon" class="hidden">🌙</span>
                     <span id="theme-toggle-light-icon">☀️</span>
                 </button>
@@ -110,75 +105,52 @@
                 <button onclick="filterNews('Politics')" class="px-3 py-1 hover:bg-gray-800 rounded transition">🗳️ राजनीति</button>
                 <button onclick="filterNews('Sports')" class="px-3 py-1 hover:bg-gray-800 rounded transition">🏏 खेल</button>
                 <button onclick="filterNews('Tech')" class="px-3 py-1 hover:bg-gray-800 rounded transition">📱 टेक्नोलॉजी</button>
-                <button onclick="filterNews('Jobs')" class="px-3 py-1 hover:bg-gray-800 rounded transition">💼 नौकरी/Jobs</button>
+                <button onclick="filterNews('Jobs')" class="px-3 py-1 hover:bg-gray-800 rounded transition">💼 नौकरी</button>
             </div>
         </nav>
 
-        <!-- BREAKING NEWS TICKER -->
+        <!-- BREAKING TICKER -->
         <div class="bg-red-600 text-white flex items-center px-4 py-1.5 text-xs font-bold">
             <span class="bg-black text-red-500 uppercase px-2 py-0.5 rounded mr-3 shrink-0 animate-pulse">BREAKING</span>
             <div class="overflow-hidden w-full">
                 <div class="ticker-move" id="ticker-text">
-                    🔥 SG NEWS: देश-विदेश और खेल जगत की हर ब्रेकिंग अपडेट यहाँ पब्लिश होती है...
+                    🔥 SG NEWS: ताजा ब्रेकिंग अपडेट्स और विस्तृत विश्लेषण के लिए बने रहें...
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- 3. MAIN CONTENT CONTAINER -->
+    <!-- 3. MAIN CONTAINER -->
     <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
-        
-        <!-- LEFT 8 COLUMNS -->
         <div class="lg:col-span-8 space-y-10">
-
-            <!-- HERO SECTION -->
-            <section id="hero-section">
-                <div id="hero-container" class="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 min-h-[220px] flex items-center justify-center">
-                    <p class="text-gray-400 text-sm">हीरो सेक्शन लोड हो रहा है...</p>
-                </div>
+            <!-- HERO -->
+            <section id="hero-container" class="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 min-h-[200px] flex items-center justify-center">
+                <p class="text-gray-400 text-sm">लोड हो रहा है...</p>
             </section>
 
             <!-- LATEST NEWS GRID -->
-            <section id="latest-news">
-                <h3 class="text-xl font-extrabold mb-4 border-l-4 border-red-600 pl-3" id="section-title">
+            <section>
+                <h2 class="text-xl font-extrabold mb-4 border-l-4 border-red-600 pl-3" id="section-title">
                     <span>📰 ताज़ा ख़बरें (Latest News)</span>
-                </h3>
-
-                <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="col-span-2 text-center py-12">
-                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-red-600 border-t-transparent"></div>
-                        <p class="mt-2 text-sm text-gray-500">खबरें लोड हो रही हैं...</p>
-                    </div>
-                </div>
+                </h2>
+                <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </section>
-
         </div>
 
-        <!-- RIGHT 4 COLUMNS: SIDEBAR -->
+        <!-- SIDEBAR -->
         <aside class="lg:col-span-4 space-y-8">
             <div class="sticky top-24 space-y-6">
-
                 <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow border border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-extrabold mb-4 border-b pb-2 border-red-600">
-                        🔥 Trending Updates
-                    </h3>
-                    <div class="space-y-4" id="trending-container">
-                        <p class="text-xs text-gray-400">अपडेट्स लोड हो रहे हैं...</p>
-                    </div>
+                    <h3 class="text-lg font-extrabold mb-4 border-b pb-2 border-red-600">🔥 Trending Updates</h3>
+                    <div class="space-y-4" id="trending-container"></div>
                 </div>
-
-                <div class="bg-gray-200 dark:bg-gray-700 h-60 rounded-xl flex items-center justify-center text-xs text-gray-500 font-bold border border-dashed border-gray-400">
-                    📢 ADVERTISEMENT SPACE
-                </div>
-
             </div>
         </aside>
-
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-gray-900 text-gray-400 text-sm mt-16 border-t border-gray-800 py-6 text-center text-xs">
-        © 2026 SG News Portal. All Rights Reserved.
+    <footer class="bg-gray-900 text-gray-400 text-xs py-6 text-center border-t border-gray-800">
+        © 2026 SG News Portal. All Rights Reserved. | <a href="./sitemap.xml" class="hover:underline">Sitemap</a>
     </footer>
 
     <!-- JAVASCRIPT LOGIC -->
@@ -186,54 +158,79 @@
         let articles = [];
         const DEFAULT_FALLBACK_IMG = "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800";
 
+        // Theme System Persistence
+        (function initTheme() {
+            const savedTheme = localStorage.getItem('color-theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
         document.addEventListener("DOMContentLoaded", () => {
             setupDate();
+            initThemeToggle();
+            initScrollProgress();
             initNewsApp();
         });
 
         function setupDate() {
-            const dateElement = document.getElementById('current-date');
-            if (dateElement) {
-                dateElement.innerText = "📅 " + new Date().toLocaleDateString('hi-IN', {
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                });
+            const el = document.getElementById('current-date');
+            if (el) el.innerText = "📅 " + new Date().toLocaleDateString('hi-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function initThemeToggle() {
+            const btn = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('theme-toggle-dark-icon');
+            const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+            if (document.documentElement.classList.contains('dark')) {
+                darkIcon?.classList.remove('hidden');
+                lightIcon?.classList.add('hidden');
+            } else {
+                lightIcon?.classList.remove('hidden');
+                darkIcon?.classList.add('hidden');
             }
+
+            btn?.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('color-theme', isDark ? 'dark' : 'light');
+                darkIcon?.classList.toggle('hidden', !isDark);
+                lightIcon?.classList.toggle('hidden', isDark);
+            });
+        }
+
+        function initScrollProgress() {
+            window.addEventListener('scroll', () => {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                const bar = document.getElementById("progress-bar");
+                if (bar) bar.style.width = scrolled + "%";
+            });
         }
 
         async function initNewsApp() {
-            const newsContainer = document.getElementById('news-container');
+            const paths = [`./data/news.json?v=${Date.now()}`, `./news.json?v=${Date.now()}`];
+            let loaded = false;
 
-            const jsonPaths = [
-                `./data/news.json?v=${Date.now()}`,
-                `./news.json?v=${Date.now()}`
-            ];
-
-            let loadedSuccessfully = false;
-
-            for (const path of jsonPaths) {
+            for (const path of paths) {
                 try {
-                    const response = await fetch(path, { cache: "no-store" });
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (Array.isArray(data)) {
-                            articles = data;
-                            loadedSuccessfully = true;
+                    const res = await fetch(path, { cache: "no-store" });
+                    if (res.ok) {
+                        articles = await res.json();
+                        if (Array.isArray(articles) && articles.length > 0) {
+                            loaded = true;
                             break;
                         }
                     }
-                } catch (err) {
-                    console.warn(`Failed loading from ${path}:`, err);
-                }
+                } catch (e) {}
             }
 
-            if (!loadedSuccessfully || articles.length === 0) {
-                if (newsContainer) {
-                    newsContainer.innerHTML = `
-                        <div class="col-span-2 text-center py-10 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow">
-                            <p class="text-gray-700 dark:text-gray-300 font-bold text-base mb-1">📰 अभी कोई खबर पब्लिश नहीं हुई है</p>
-                            <p class="text-xs text-gray-500">Python Bot चलाकर नई खबरें पोस्ट करें।</p>
-                        </div>`;
-                }
+            if (!loaded || articles.length === 0) {
+                document.getElementById('news-container').innerHTML = `<p class="col-span-2 text-center py-8 text-gray-500">कोई खबर उपलब्ध नहीं है।</p>`;
                 return;
             }
 
@@ -244,165 +241,100 @@
             renderTrending(articles);
         }
 
-        function renderHero(dataList) {
-            if (!dataList || dataList.length === 0) return;
+        function renderHero(data) {
+            const container = document.getElementById('hero-container');
+            if (!container) return;
+            const hero = data.find(a => a.isHero) || data[0];
+            const link = `./article.html?id=${hero.id}`;
+            const img = hero.image?.startsWith('http') ? hero.image : DEFAULT_FALLBACK_IMG;
 
-            const heroContainer = document.getElementById('hero-container');
-            if (!heroContainer) return;
-
-            const hero = dataList.find(a => a.isHero) || dataList[0];
-            if (!hero) return;
-
-            const heroLink = `./article.html?id=${hero.id}`;
-            const heroImg = hero.image && hero.image.startsWith('http') ? hero.image : DEFAULT_FALLBACK_IMG;
-
-            heroContainer.innerHTML = `
-                <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-3 py-1 rounded shadow uppercase z-10">
-                    🔴 LIVE BREAKING
-                </span>
-                <a href="${heroLink}">
-                    <img src="${heroImg}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" alt="${hero.title || 'News'}" loading="lazy" class="w-full h-80 md:h-96 object-cover hover:opacity-95 transition">
-                </a>
-                <div class="p-6">
-                    <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                        <span>📅 ${hero.date || 'आज'}</span>
-                        <span>⏱️ ${hero.readTime || '3 मिनट'}</span>
-                        <span>👁️ ${hero.views || '1.2k'} Views</span>
-                    </div>
-                    <a href="${heroLink}">
-                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white leading-snug hover:text-red-600 transition">
-                            ${hero.title || 'शीर्षक उपलब्ध नहीं है'}
-                        </h2>
+            container.innerHTML = `
+                <div class="w-full">
+                    <a href="${link}">
+                        <img src="${img}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" alt="${hero.title}" class="w-full h-80 md:h-96 object-cover">
                     </a>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm mt-3 line-clamp-2">
-                        ${hero.summary || ''}
-                    </p>
-                    <div class="mt-4 flex items-center justify-between">
-                        <a href="${heroLink}" class="text-sm font-bold text-red-600 dark:text-red-400 hover:underline">पूरा पढ़ें →</a>
-                        <button onclick="shareArticle('${hero.title || 'SG News'}')" class="text-xs font-bold text-gray-500 hover:text-red-600">🔗 Share</button>
+                    <div class="p-6">
+                        <span class="text-xs font-bold text-red-600 dark:text-red-400">🔴 BREAKING</span>
+                        <a href="${link}">
+                            <h2 class="text-2xl font-black mt-1 hover:text-red-600 transition">${hero.title}</h2>
+                        </a>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">${hero.summary || ''}</p>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
-        function renderNews(dataList) {
-            const newsContainer = document.getElementById('news-container');
-            if (!newsContainer) return;
+        function renderNews(data) {
+            const container = document.getElementById('news-container');
+            if (!container) return;
+            container.innerHTML = '';
 
-            newsContainer.innerHTML = '';
+            data.forEach(item => {
+                const link = `./article.html?id=${item.id}`;
+                const img = item.image?.startsWith('http') ? item.image : DEFAULT_FALLBACK_IMG;
 
-            if (!dataList || dataList.length === 0) {
-                newsContainer.innerHTML = `<p class="col-span-2 text-center text-gray-500 py-8">कोई खबर नहीं मिली।</p>`;
-                return;
-            }
-
-            dataList.forEach(item => {
-                const articleLink = `./article.html?id=${item.id}`;
-                const itemImg = item.image && item.image.startsWith('http') ? item.image : DEFAULT_FALLBACK_IMG;
-
-                newsContainer.innerHTML += `
-                    <div class="news-card bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:shadow-lg transition">
+                container.innerHTML += `
+                    <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
                         <div>
-                            <a href="${articleLink}">
-                                <img src="${itemImg}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" alt="${item.title || 'News'}" loading="lazy" class="w-full h-48 object-cover hover:opacity-90 transition">
-                            </a>
+                            <a href="${link}"><img src="${img}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" class="w-full h-48 object-cover"></a>
                             <div class="p-4">
-                                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-200">${item.category || 'News'}</span>
-                                <a href="${articleLink}">
-                                    <h4 class="font-bold text-base mt-2 hover:text-red-600 transition text-gray-900 dark:text-white line-clamp-2">${item.title || ''}</h4>
-                                </a>
-                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">${item.summary || ''}</p>
+                                <span class="text-[10px] uppercase font-bold text-red-600">${item.category || 'News'}</span>
+                                <a href="${link}"><h3 class="font-bold text-base mt-1 hover:text-red-600 line-clamp-2">${item.title}</h3></a>
+                                <p class="text-xs text-gray-500 mt-2 line-clamp-2">${item.summary || ''}</p>
                             </div>
                         </div>
-                        <div class="p-4 pt-0 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 mt-3">
-                            <span>⏱️ ${item.readTime || '3 मिनट'}</span>
-                            <a href="${articleLink}" class="text-red-600 dark:text-red-400 font-bold hover:underline">पूरा पढ़ें →</a>
+                        <div class="p-4 pt-0 flex justify-between items-center text-xs text-gray-400 border-t border-gray-100 dark:border-gray-700 mt-2">
+                            <span>⏱️ ${item.readTime || '2 मिनट'}</span>
+                            <button onclick="shareArticle('${item.title}', '${link}')" class="text-red-600 font-bold">🔗 Share</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
-        function renderTrending(dataList) {
-            const trendingContainer = document.getElementById('trending-container');
-            if (!trendingContainer) return;
+        function renderTrending(data) {
+            const container = document.getElementById('trending-container');
+            if (!container) return;
+            const trending = data.filter(a => a.isTrending || a.views > 500).slice(0, 5);
 
-            const trendingList = dataList.filter(a => a.isTrending);
-            
-            trendingContainer.innerHTML = '';
-            if (trendingList.length === 0) {
-                trendingContainer.innerHTML = `<p class="text-xs text-gray-400">कोई ट्रेंडिंग अपडेट नहीं है।</p>`;
-                return;
-            }
-
-            trendingList.forEach((item, index) => {
-                const articleLink = `./article.html?id=${item.id}`;
-                trendingContainer.innerHTML += `
-                    <div class="flex items-start space-x-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
-                        <span class="text-2xl font-black text-red-600 opacity-60">0${index + 1}</span>
-                        <div>
-                            <span class="text-[10px] font-extrabold uppercase text-gray-400">${item.category || 'News'}</span>
-                            <a href="${articleLink}">
-                                <h5 class="text-sm font-bold hover:text-red-600 cursor-pointer text-gray-800 dark:text-gray-200 line-clamp-2">${item.title || ''}</h5>
-                            </a>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function filterNews(category) {
-            const titleElement = document.getElementById('section-title');
-            if (category === 'all') {
-                if (titleElement) titleElement.innerHTML = `<span>📰 ताज़ा ख़बरें (Latest News)</span>`;
-                renderNews(articles);
-            } else {
-                if (titleElement) titleElement.innerHTML = `<span>📂 ${category} ख़बरें</span>`;
-                const filtered = articles.filter(a => 
-                    (a.category && a.category.toLowerCase() === category.toLowerCase()) || 
-                    (category === 'Trending' && a.isTrending)
-                );
-                renderNews(filtered);
-            }
+            container.innerHTML = trending.map((item, i) => `
+                <div class="flex items-start space-x-3 pb-2 border-b dark:border-gray-700">
+                    <span class="text-xl font-black text-red-600 opacity-60">0${i+1}</span>
+                    <a href="./article.html?id=${item.id}" class="text-xs font-bold hover:text-red-600 line-clamp-2">${item.title}</a>
+                </div>
+            `).join('');
         }
 
         function searchLiveNews() {
-            const queryInput = document.getElementById('main-search');
-            if (!queryInput) return;
-
-            const query = queryInput.value.toLowerCase().trim();
-            if (query === '') {
-                renderNews(articles);
-                return;
-            }
-
-            const filtered = articles.filter(item => 
-                (item.title && item.title.toLowerCase().includes(query)) || 
-                (item.summary && item.summary.toLowerCase().includes(query))
+            const q = document.getElementById('main-search').value.toLowerCase().trim();
+            if (!q) { renderNews(articles); return; }
+            const filtered = articles.filter(a => 
+                a.title?.toLowerCase().includes(q) || 
+                a.summary?.toLowerCase().includes(q) || 
+                a.content?.toLowerCase().includes(q)
             );
             renderNews(filtered);
         }
 
-        function toggleSpeech() {
-            if ('speechSynthesis' in window && articles.length > 0) {
-                let heroTitle = articles[0].title;
-                let msg = new SpeechSynthesisUtterance(heroTitle);
-                msg.lang = 'hi-IN';
-                window.speechSynthesis.speak(msg);
+        function filterNews(cat) {
+            if (cat === 'all') renderNews(articles);
+            else renderNews(articles.filter(a => a.category?.toLowerCase() === cat.toLowerCase() || (cat === 'Trending' && a.isTrending)));
+        }
+
+        function shareArticle(title, relativeLink) {
+            const fullUrl = window.location.origin + window.location.pathname.replace('index.html', '') + relativeLink;
+            if (navigator.share) {
+                navigator.share({ title: title, url: fullUrl }).catch(() => {});
             } else {
-                alert("कोई खबर उपलब्ध नहीं है या आपका ब्राउज़र स्पीच सपोर्ट नहीं करता।");
+                navigator.clipboard.writeText(fullUrl);
+                alert('लिंक कॉपी हो गया!');
             }
         }
 
-        function shareArticle(title) {
-            if (navigator.share) {
-                navigator.share({
-                    title: title,
-                    url: window.location.href
-                }).catch(() => {});
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert("लिंक कॉपी हो गया है!");
+        function toggleVoiceAssist() {
+            if ('speechSynthesis' in window && articles.length > 0) {
+                window.speechSynthesis.cancel();
+                const msg = new SpeechSynthesisUtterance(articles[0].title + ". " + (articles[0].summary || ""));
+                msg.lang = 'hi-IN';
+                window.speechSynthesis.speak(msg);
             }
         }
     </script>
