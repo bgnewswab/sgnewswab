@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /data/
 
 Sitemap: https://bgnewswab.github.io/sgnewswab/sitemap.xml
