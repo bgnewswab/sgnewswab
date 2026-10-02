@@ -211,7 +211,7 @@
                 <article class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow border border-gray-200 dark:border-gray-700">
                     <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-4">
                         <span class="bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-200 font-bold px-2 py-0.5 rounded uppercase">${article.category || 'General'}</span>
-                        <span>📅 Published: ${article.publishedDate || article.date || 'आज'}</span>
+                       📅 Published: ${article.date}${article.time ? ' · 🕒 ' + article.time : ''}
                         ${article.updatedDate ? `<span>🔄 Updated: ${article.updatedDate}</span>` : ''}
                         <span>⏱️ ${autoReadTime}</span>
                         <span>👁️ ${article.views || '1k'} Views</span>
