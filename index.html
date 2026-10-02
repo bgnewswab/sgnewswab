@@ -176,9 +176,35 @@
         });
 
         function setupDate() {
-            const el = document.getElementById('current-date');
-            if (el) el.innerText = "📅 " + new Date().toLocaleDateString('hi-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        }
+    const el = document.getElementById('current-date');
+
+    const updateClock = () => {
+        if (!el) return;
+
+        const now = new Date();
+
+        const date = new Intl.DateTimeFormat('hi-IN', {
+            timeZone: 'Asia/Kolkata',
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }).format(now);
+
+        const time = new Intl.DateTimeFormat('hi-IN', {
+            timeZone: 'Asia/Kolkata',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        }).format(now);
+
+        el.innerText = '📅 ' + date + ' · 🕒 ' + time + ' IST';
+    };
+
+    updateClock();
+    setInterval(updateClock, 1000);
+}
 
         function initThemeToggle() {
             const btn = document.getElementById('theme-toggle');
