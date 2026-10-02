@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SG News - देश-दुनिया की ताज़ा और निष्पक्ष ख़बरें</title>
-    
+
     <!-- Dynamic & Primary Meta Tags -->
     <meta name="description" content="SG News पर पढ़ें देश, दुनिया, खेल, राजनीति, टेक्नोलॉजी और जॉब्स की सबसे तेज़ और सटीक हिंदी खबरें।">
     <meta name="keywords" content="SG News, Hindi News, Latest News, Breaking News Hindi, Sports News, Politics">
@@ -44,7 +44,7 @@
             theme: { extend: { colors: { brand: '#DC2626' } } }
         }
     </script>
-    
+
     <style>
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
         .ticker-move { display: inline-block; white-space: nowrap; animation: ticker 35s linear infinite; }
@@ -84,7 +84,7 @@
 
             <div class="flex items-center space-x-3">
                 <div class="relative hidden md:block">
-                    <input type="text" id="main-search" onkeyup="searchLiveNews()" placeholder="खबरें खोजें (Title, Content)..." 
+                    <input type="text" id="main-search" onkeyup="searchLiveNews()" placeholder="खबरें खोजें (Title, Content)..."
                         class="bg-gray-100 dark:bg-gray-700 text-sm rounded-full pl-9 pr-4 py-2 w-64 focus:outline-none border dark:border-gray-600">
                     <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
                 </div>
@@ -158,6 +158,26 @@
         let articles = [];
         const DEFAULT_FALLBACK_IMG = "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800";
 
+        // ---------- Helpers ----------
+        // टाइटल/टेक्स्ट में " ' < > होने पर HTML न टूटे
+        function esc(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // "1.5k" / "890" / 1200 -> number
+        function parseViews(v) {
+            if (typeof v === 'number') return v;
+            const s = String(v ?? '').trim().toLowerCase().replace(/,/g, '');
+            if (s.endsWith('k')) return parseFloat(s) * 1000 || 0;
+            if (s.endsWith('m')) return parseFloat(s) * 1000000 || 0;
+            return parseFloat(s) || 0;
+        }
+
         // Theme System Persistence
         (function initTheme() {
             const savedTheme = localStorage.getItem('color-theme');
@@ -175,36 +195,45 @@
             initNewsApp();
         });
 
+        // ---------- तारीख़ और लाइव घड़ी (IST, सर्वर समय से सुधार के साथ) ----------
         function setupDate() {
-    const el = document.getElementById('current-date');
+            const el = document.getElementById('current-date');
+            let offset = 0; // सर्वर समय और डिवाइस समय का अंतर (ms)
 
-    const updateClock = () => {
-        if (!el) return;
+            const updateClock = () => {
+                if (!el) return;
+                const now = new Date(Date.now() + offset);
 
-        const now = new Date();
+                const date = new Intl.DateTimeFormat('hi-IN', {
+                    timeZone: 'Asia/Kolkata',
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                }).format(now);
 
-        const date = new Intl.DateTimeFormat('hi-IN', {
-            timeZone: 'Asia/Kolkata',
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        }).format(now);
+                const time = new Intl.DateTimeFormat('hi-IN', {
+                    timeZone: 'Asia/Kolkata',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                }).format(now);
 
-        const time = new Intl.DateTimeFormat('hi-IN', {
-            timeZone: 'Asia/Kolkata',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-        }).format(now);
+                el.innerText = '📅 ' + date + ' · 🕒 ' + time + ' IST';
+            };
 
-        el.innerText = '📅 ' + date + ' · 🕒 ' + time + ' IST';
-    };
+            updateClock();
+            setInterval(updateClock, 1000);
 
-    updateClock();
-    setInterval(updateClock, 1000);
-}
+            // अगर यूज़र के डिवाइस की घड़ी ग़लत है तो सर्वर के समय से ठीक कर दो
+            (async () => {
+                try {
+                    const t0 = Date.now();
+                    const res = await fetch(location.href.split('#')[0], { method: 'HEAD', cache: 'no-store' });
+                    const t1 = Date.now();
+                    const serverDate = res.headers.get('Date');
+                    if (serverDate) {
+                        offset = new Date(serverDate).getTime() - (t0 + t1) / 2;
+                        updateClock();
+                    }
+                } catch (e) {}
+            })();
+        }
 
         function initThemeToggle() {
             const btn = document.getElementById('theme-toggle');
@@ -232,7 +261,7 @@
             window.addEventListener('scroll', () => {
                 const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
                 const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                const scrolled = (winScroll / height) * 100;
+                const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
                 const bar = document.getElementById("progress-bar");
                 if (bar) bar.style.width = scrolled + "%";
             });
@@ -273,58 +302,69 @@
             const hero = data.find(a => a.isHero) || data[0];
             const link = `./article.html?id=${hero.id}`;
             const img = hero.image?.startsWith('http') ? hero.image : DEFAULT_FALLBACK_IMG;
+            const heroWhen = [hero.date, hero.time].filter(Boolean).join(' · ');
 
             container.innerHTML = `
                 <div class="w-full">
                     <a href="${link}">
-                        <img src="${img}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" alt="${hero.title}" class="w-full h-80 md:h-96 object-cover">
+                        <img src="${esc(img)}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" alt="${esc(hero.title)}" class="w-full h-80 md:h-96 object-cover">
                     </a>
                     <div class="p-6">
                         <span class="text-xs font-bold text-red-600 dark:text-red-400">🔴 BREAKING</span>
+                        ${heroWhen ? `<span class="text-xs text-gray-400 ml-2">📅 ${esc(heroWhen)}</span>` : ''}
                         <a href="${link}">
-                            <h2 class="text-2xl font-black mt-1 hover:text-red-600 transition">${hero.title}</h2>
+                            <h2 class="text-2xl font-black mt-1 hover:text-red-600 transition">${esc(hero.title)}</h2>
                         </a>
-                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">${hero.summary || ''}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">${esc(hero.summary || '')}</p>
                     </div>
                 </div>`;
         }
 
+        // ---------- ख़बरों के कार्ड (तारीख़ + समय के साथ) ----------
         function renderNews(data) {
             const container = document.getElementById('news-container');
             if (!container) return;
-            container.innerHTML = '';
 
-            data.forEach(item => {
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="col-span-2 text-center py-8 text-gray-500">कोई खबर नहीं मिली।</p>`;
+                return;
+            }
+
+            container.innerHTML = data.map(item => {
                 const link = `./article.html?id=${item.id}`;
                 const img = item.image?.startsWith('http') ? item.image : DEFAULT_FALLBACK_IMG;
 
-                container.innerHTML += `
+                return `
                     <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
                         <div>
-                            <a href="${link}"><img src="${img}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" class="w-full h-48 object-cover"></a>
+                            <a href="${link}"><img src="${esc(img)}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'" alt="${esc(item.title)}" class="w-full h-48 object-cover"></a>
                             <div class="p-4">
-                                <span class="text-[10px] uppercase font-bold text-red-600">${item.category || 'News'}</span>
-                                <a href="${link}"><h3 class="font-bold text-base mt-1 hover:text-red-600 line-clamp-2">${item.title}</h3></a>
-                                <p class="text-xs text-gray-500 mt-2 line-clamp-2">${item.summary || ''}</p>
+                                <span class="text-[10px] uppercase font-bold text-red-600">${esc(item.category || 'News')}</span>
+                                <a href="${link}"><h3 class="font-bold text-base mt-1 hover:text-red-600 line-clamp-2">${esc(item.title)}</h3></a>
+                                <p class="text-xs text-gray-500 mt-2 line-clamp-2">${esc(item.summary || '')}</p>
                             </div>
                         </div>
                         <div class="p-4 pt-0 flex justify-between items-center text-xs text-gray-400 border-t border-gray-100 dark:border-gray-700 mt-2">
-                            <span>⏱️ ${item.readTime || '2 मिनट'}</span>
-                            <button onclick="shareArticle('${item.title}', '${link}')" class="text-red-600 font-bold">🔗 Share</button>
+                            <span>
+                                ${item.date ? '📅 ' + esc(item.date) : ''}
+                                ${item.time ? ' · 🕒 ' + esc(item.time) : ''}
+                                · ⏱️ ${esc(item.readTime || '2 मिनट')}
+                            </span>
+                            <button onclick="shareById(${item.id})" class="text-red-600 font-bold">🔗 Share</button>
                         </div>
                     </div>`;
-            });
+            }).join('');
         }
 
         function renderTrending(data) {
             const container = document.getElementById('trending-container');
             if (!container) return;
-            const trending = data.filter(a => a.isTrending || a.views > 500).slice(0, 5);
+            const trending = data.filter(a => a.isTrending || parseViews(a.views) > 500).slice(0, 5);
 
             container.innerHTML = trending.map((item, i) => `
                 <div class="flex items-start space-x-3 pb-2 border-b dark:border-gray-700">
-                    <span class="text-xl font-black text-red-600 opacity-60">0${i+1}</span>
-                    <a href="./article.html?id=${item.id}" class="text-xs font-bold hover:text-red-600 line-clamp-2">${item.title}</a>
+                    <span class="text-xl font-black text-red-600 opacity-60">0${i + 1}</span>
+                    <a href="./article.html?id=${item.id}" class="text-xs font-bold hover:text-red-600 line-clamp-2">${esc(item.title)}</a>
                 </div>
             `).join('');
         }
@@ -332,9 +372,9 @@
         function searchLiveNews() {
             const q = document.getElementById('main-search').value.toLowerCase().trim();
             if (!q) { renderNews(articles); return; }
-            const filtered = articles.filter(a => 
-                a.title?.toLowerCase().includes(q) || 
-                a.summary?.toLowerCase().includes(q) || 
+            const filtered = articles.filter(a =>
+                a.title?.toLowerCase().includes(q) ||
+                a.summary?.toLowerCase().includes(q) ||
                 a.content?.toLowerCase().includes(q)
             );
             renderNews(filtered);
@@ -345,13 +385,20 @@
             else renderNews(articles.filter(a => a.category?.toLowerCase() === cat.toLowerCase() || (cat === 'Trending' && a.isTrending)));
         }
 
-        function shareArticle(title, relativeLink) {
-            const fullUrl = window.location.origin + window.location.pathname.replace('index.html', '') + relativeLink;
+        // शेयर: टाइटल में quote होने पर भी सुरक्षित (id से आर्टिकल ढूँढता है)
+        function shareById(id) {
+            const item = articles.find(a => a.id === id);
+            if (!item) return;
+            const relativeLink = `./article.html?id=${item.id}`;
+            const basePath = window.location.pathname.replace(/index\.html$/, '');
+            const fullUrl = window.location.origin + basePath + relativeLink.replace('./', '');
+
             if (navigator.share) {
-                navigator.share({ title: title, url: fullUrl }).catch(() => {});
+                navigator.share({ title: item.title, url: fullUrl }).catch(() => {});
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(fullUrl).then(() => alert('लिंक कॉपी हो गया!'));
             } else {
-                navigator.clipboard.writeText(fullUrl);
-                alert('लिंक कॉपी हो गया!');
+                prompt('यह लिंक कॉपी करें:', fullUrl);
             }
         }
 
